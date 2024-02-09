@@ -4,7 +4,7 @@
     <Balance :total="+total"/>
     <IncomeExpense :income="+income" :expenses="+expenses" />
     <TransactionList :transactions="transactions" @deleteTransaction="handleTransactionDeleted"/>
-    <AddTransaction @transactionSubmitted="handleTransactionSubmitted/>
+    <AddTransaction @transactionSubmitted="handleTransactionSubmitted"/>
   </div>
  </template>
 
@@ -14,66 +14,60 @@
   import IncomeExpense from './components/IncomeExpense.vue';
   import TransactionList from './components/TransactionList.vue';
   import AddTransaction from './components/AddTransaction.vue';
-  import {useToast} from 'vue-toastification';
-import {ref,computed,onMounted} from 'vue';
+  import { useToast } from 'vue-toastification';
+  import { ref, computed, onMounted } from 'vue';
 
-const toast = useToast();
-const transactions = ref([]);
-onMounted(()=>{
+  const toast = useToast();
+  const transactions = ref([]);
+
+  // Save to localstorage function
+  const saveToLocalStorage = () => {
+    localStorage.setItem('transactions', JSON.stringify(transactions.value));
+  };
+
+  onMounted(() => {
     const savedTransactions = JSON.parse(localStorage.getItem('transactions')) || [];
 
-    if(savedTransactions){
-        transactions.value = savedTransactions;
+    if (savedTransactions) {
+      transactions.value = savedTransactions;
     }
-});
-//get total
-const total = computed(()=>{
-    return transactions.value.reduce((acc,transaction)=>{
-      return acc+transaction.amount;
-},0);
-});
+  });
 
-//get income
-const income = computed(()=>{
-    return transactions.value.filter((transaction)=>transaction.amount>0).reduce((acc,transaction)=>{
-      return acc+transaction.amount;
-},0).toFixed(2);
-});
+  // Get total
+  const total = computed(() => {
+    return transactions.value.reduce((acc, transaction) => acc + transaction.amount, 0);
+  });
 
-//get expense
-const expenses = computed(()=>{
-    return transactions.value.filter((transaction)=>transaction.amount<0).reduce((acc,transaction)=>{
-      return acc+transaction.amount;
-},0).toFixed(2);
-});
+  // Get income
+  const income = computed(() => {
+    return transactions.value.filter((transaction) => transaction.amount > 0).reduce((acc, transaction) => acc + transaction.amount, 0).toFixed(2);
+  });
 
-//add transaction
+  // Get expense
+  const expenses = computed(() => {
+    return transactions.value.filter((transaction) => transaction.amount < 0).reduce((acc, transaction) => acc + transaction.amount, 0).toFixed(2);
+  });
 
-const handleTransactionSubmitted = (transactionData) => {
+  // Add transaction
+  const handleTransactionSubmitted = (transactionData) => {
     transactions.value.push({
-        id: generateUniqueId(),
-        text: transactionData.text,
-        amount: transactionData.amount
+      id: generateUniqueId(),
+      text: transactionData.text,
+      amount: transactionData.amount
     });
     toast.success('Transaction added successfully');
-};
-saveToLocalStorage();
-const generateUniqueId = () => {
+    saveToLocalStorage(); // Call saveToLocalStorage after adding the transaction
+  };
+
+  // Generate unique ID
+  const generateUniqueId = () => {
     return Math.floor(Math.random() * 100000000);
-};
+  };
 
-//delete transaction
-
-const handleTransactionDeleted = (id) => {
+  // Delete transaction
+  const handleTransactionDeleted = (id) => {
     transactions.value = transactions.value.filter((transaction) => transaction.id !== id);
-
-    saveToLocalStorage();
     toast.success('Transaction deleted successfully');
-};
-
-//save to localstorage
-const saveToLocalStorage = () => {
-    localStorage.setItem('transactions',JSON.stringify(transactions.value));
-};
+    saveToLocalStorage(); // Call saveToLocalStorage after deleting the transaction
+  };
 </script>
-

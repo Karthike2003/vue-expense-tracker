@@ -8,7 +8,7 @@
         <div class="form-control">
           <label for="amount"
             >Amount <br />
-            (negative - expense, positive - income)</label
+            (add negative sign for expense)</label
           >
           <input type="number" id="amount" v-model="amount" placeholder="Enter amount..." />
         </div>
